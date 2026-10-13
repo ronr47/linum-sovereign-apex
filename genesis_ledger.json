@@ -1,6 +1,6 @@
 {
   "node": "Dellamarie",
-  "total_experiences": 3,
+  "total_experiences": 4,
   "experiences": [
     {
       "experience_id": "exp-1791920580888",
@@ -37,6 +37,18 @@
         "node_state": "active"
       },
       "timestamp": 1791921111.9589314
+    },
+    {
+      "experience_id": "exp-1791921134234",
+      "project": "linum-apex",
+      "event_type": "substrate_heartbeat",
+      "subject": "Dellamarie",
+      "status": "optimal",
+      "details": {
+        "invariant": "0x42",
+        "daemon": "active"
+      },
+      "timestamp": 1791921134.2346132
     }
   ]
 }
