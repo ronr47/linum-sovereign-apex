@@ -3,7 +3,7 @@
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path.home() / "linum-sovereign-apex" / "config" / "linum_apex.db"
+DB_PATH = Path.home() / "linum-apex-apex" / "config" / "linum_apex.db"
 
 def get_connection():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)

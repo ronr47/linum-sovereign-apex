@@ -2,7 +2,7 @@ from pathlib import Path
 import sqlite3
 from memory.database import get_connection
 
-WORKSPACE_DIR = Path("~/linum-sovereign-apex").expanduser().resolve()
+WORKSPACE_DIR = Path("~/linum-apex-apex").expanduser().resolve()
 
 def index_workspace():
     conn = get_connection()

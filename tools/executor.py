@@ -1,7 +1,7 @@
 from pathlib import Path
 import difflib
 
-WORKSPACE_DIR = Path("~/linum-sovereign-apex").expanduser().resolve()
+WORKSPACE_DIR = Path("~/linum-apex-apex").expanduser().resolve()
 
 def verify_path(filepath: str) -> Path:
     candidate = (WORKSPACE_DIR / filepath).resolve()
