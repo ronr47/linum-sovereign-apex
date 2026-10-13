@@ -1,0 +1,59 @@
+from core.orchestrator import Orchestrator
+from core.health import check_system_health, send_notification
+from memory.database import retrieve_memories
+from knowledge.indexer import index_workspace, search_project
+
+def run_cli():
+    orchestrator = Orchestrator()
+    health = check_system_health()
+    
+    print("="*70)
+    print(" ▲ LINUM GENESIS // LOCAL COMPANION KERNEL [DELLAMARIE]")
+    print(f" Status: {health["status"]} | Model: {orchestrator.runtime.model_name}")
+    print(" Commands: /help, /status, /health, /memory, /search <term>, /index, /exit")
+    print("="*70)
+
+    send_notification("GENESIS INITIALIZED", f"Node Dellamarie online. Status: {health["status"]}")
+
+    while True:
+        try:
+            query = input("\n[ron@Dellamarie Genesis]# ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n[GENESIS] Shutting down. Invariant 0x42 preserved.")
+            break
+
+        if not query:
+            continue
+        elif query == "/exit":
+            print("[GENESIS] Shutdown complete.")
+            break
+        elif query == "/help":
+            print("Commands:\n  /status - Display runtime backend info\n  /health - Run system observability check\n  /memory - View persistent SQLite records\n  /search <term> - Query project files\n  /index - Synchronize project index\n  /exit - Terminate session")
+            continue
+        elif query == "/status":
+            info = orchestrator.runtime.model_info()
+            print(f"[GENESIS] Backend: {info[backend]} | Model: {info[model]} | Host: {info[host]}")
+            continue
+        elif query == "/health":
+            h = check_system_health()
+            print(f"[GENESIS] Health Report:\n  - Status: {h[status]}\n  - Model Connected: {h[model_connected]}\n  - Database Healthy: {h[database_healthy]}")
+            continue
+        elif query == "/memory":
+            print("\n[GENESIS] Recent Persistent Memories:")
+            for ts, cat, content in retrieve_memories():
+                print(f"  [{ts}] ({cat}): {content}")
+            continue
+        elif query == "/index":
+            index_workspace()
+            continue
+        elif query.startswith("/search "):
+            term = query.split(" ", 1)[1]
+            matches = search_project(term)
+            print(f"\n[GENESIS] Index matches for {term}:")
+            for m in matches:
+                print(f"  -> {m}")
+            continue
+
+        print("[GENESIS] Synthesizing via local model...")
+        answer = orchestrator.process_request(query)
+        print(f"\n{answer}")

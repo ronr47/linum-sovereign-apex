@@ -1,0 +1,51 @@
+import urllib.request
+import json
+
+class ModelRuntime:
+    def generate(self, messages, **options):
+        raise NotImplementedError
+
+    def health_check(self) -> bool:
+        raise NotImplementedError
+
+    def model_info(self) -> dict:
+        raise NotImplementedError
+
+class OllamaRuntime(ModelRuntime):
+    def __init__(self, model_name="qwen2.5-coder:0.5b", host="http://127.0.0.1:11434"):
+        self.model_name = model_name
+        self.host = host
+
+    def generate(self, prompt: str, temperature: float = 0.2, num_predict: int = 256) -> str:
+        url = f"{self.host}/api/generate"
+        payload = {
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": temperature,
+                "top_p": 0.8,
+                "num_predict": num_predict,
+                "repeat_penalty": 1.1,
+                "stop": ["User:", "System:"]
+            }
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                res = json.loads(resp.read().decode("utf-8"))
+                return res.get("response", "").strip()
+        except Exception as e:
+            return f"[GENESIS] Inference Error: {e}"
+
+    def health_check(self) -> bool:
+        try:
+            req = urllib.request.Request(f"{self.host}/api/tags")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    def model_info(self) -> dict:
+        return {"backend": "Ollama", "model": self.model_name, "host": self.host}

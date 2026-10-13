@@ -1,0 +1,23 @@
+from core.model_runtime import OllamaRuntime
+from memory.database import init_db, store_memory, retrieve_memories
+from knowledge.indexer import index_workspace, search_project
+
+class Orchestrator:
+    def __init__(self):
+        init_db()
+        self.runtime = OllamaRuntime()
+        self.system_prompt = (
+            "You are LINUM GENESIS, an elite offline engineering companion "
+            "embedded on node Dellamarie under Invariant 0x42. "
+            "Provide strictly technical, concise, authoritative answers."
+        )
+
+    def process_request(self, user_query: str) -> str:
+        store_memory("user_query", user_query)
+        memories = retrieve_memories(limit=3)
+        context_str = "\n".join([f"[{cat}]: {content}" for _, cat, content in memories])
+        
+        combined_prompt = f"System: {self.system_prompt}\n\nRecent Context:\n{context_str}\n\nUser: {user_query}\nResponse:"
+        response = self.runtime.generate(combined_prompt)
+        store_memory("assistant_response", response)
+        return response
