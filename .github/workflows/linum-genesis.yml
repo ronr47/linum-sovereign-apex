@@ -1,0 +1,48 @@
+name: LINUM GENESIS CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile Python modules
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import py_compile
+
+          excluded = {".git", ".venv", "venv", "__pycache__"}
+          files = sorted(
+              p for p in Path(".").rglob("*.py")
+              if not any(part in excluded for part in p.parts)
+          )
+
+          if not files:
+              raise SystemExit("FAIL: No Python modules found")
+
+          for path in files:
+              py_compile.compile(str(path), doraise=True)
+
+          print(f"PASS: {len(files)} Python modules compiled")
+          PY
+
+      - name: Run regression suite
+        run: python3 -m unittest discover -s tests -v

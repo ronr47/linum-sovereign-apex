@@ -1,0 +1,82 @@
+import sqlite3
+from datetime import datetime
+from pathlib import Path
+
+DB_PATH = (
+    Path.home() / "linum-sovereign-apex" / "config" / "linum_apex.db"
+)
+CONNECT_TIMEOUT = 3.0
+
+
+def get_connection():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(
+        str(DB_PATH),
+        timeout=CONNECT_TIMEOUT,
+    )
+    conn.execute("PRAGMA busy_timeout = 3000")
+    return conn
+
+
+def init_db():
+    with get_connection() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS memories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                category TEXT,
+                content TEXT,
+                provenance TEXT
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS project_files (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filepath TEXT UNIQUE,
+                content TEXT,
+                mtime REAL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_journal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                task TEXT,
+                status TEXT,
+                result TEXT
+            )
+        """)
+
+
+def store_memory(category, content, provenance="genesis_session"):
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO memories
+                (timestamp, category, content, provenance)
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                datetime.now().astimezone().isoformat(),
+                str(category),
+                str(content),
+                str(provenance),
+            ),
+        )
+
+
+def retrieve_memories(limit=5):
+    limit = int(limit)
+    if not 1 <= limit <= 100:
+        raise ValueError("limit must be between 1 and 100")
+
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT timestamp, category, content
+            FROM memories
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()

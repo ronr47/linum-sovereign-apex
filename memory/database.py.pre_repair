@@ -1,0 +1,58 @@
+import sqlite3
+from pathlib import Path
+from datetime import datetime
+
+DB_PATH = Path("~/linum-sovereign-apex/config/linum_apex.db").expanduser().resolve()
+
+def get_connection():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    return sqlite3.connect(DB_PATH)
+
+def init_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS memories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            category TEXT,
+            content TEXT,
+            provenance TEXT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS project_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filepath TEXT UNIQUE,
+            content TEXT,
+            mtime REAL
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS task_journal (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            task TEXT,
+            status TEXT,
+            result TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def store_memory(category, content, provenance="genesis_session"):
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO memories (timestamp, category, content, provenance) VALUES (?, ?, ?, ?)",
+        (datetime.now().isoformat(), category, content, provenance)
+    )
+    conn.commit()
+    conn.close()
+
+def retrieve_memories(limit=5):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT timestamp, category, content FROM memories ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
