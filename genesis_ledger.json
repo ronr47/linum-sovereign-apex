@@ -1,0 +1,30 @@
+{
+  "node": "Dellamarie",
+  "total_experiences": 2,
+  "experiences": [
+    {
+      "experience_id": "exp-1791920580888",
+      "project": "linum-genesis",
+      "event_type": "system_bootstrap",
+      "subject": "Dellamarie",
+      "status": "optimal",
+      "details": {
+        "invariant": "0x42"
+      },
+      "timestamp": 1791920580.8886714
+    },
+    {
+      "experience_id": "exp-1791920635229",
+      "project": "linum-genesis",
+      "event_type": "task_execution",
+      "subject": "457ddd1c-1ad3-4ce4-8800-5959a90f1e6d",
+      "status": "completed",
+      "details": {
+        "payload": "LINUM_GENESIS_VERIFY",
+        "exit_code": 0,
+        "duration": 3.0994415283203125e-06
+      },
+      "timestamp": 1791920635.2295535
+    }
+  ]
+}
